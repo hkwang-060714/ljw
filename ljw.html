@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>生日快乐呀</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: #fef5f7;
+            padding: 20px;
+            color: #333;
+        }
+
+        .header {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            color: #e85d75;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            color: #666;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        /* 音乐播放 */
+        .music-box {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .music-box button {
+            background: #e85d75;
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+
+        .music-box button:hover {
+            background: #d44d65;
+        }
+
+        /* 内容区 */
+        .content-section {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin: 20px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .content-section h2 {
+            color: #e85d75;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        /* 照片 */
+        .photos {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .photo-box {
+            aspect-ratio: 1;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #f5f5f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s;
+        }
+
+        .photo-box:hover {
+            background: #e8e8e8;
+        }
+
+        .photo-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .photo-box input[type="file"] {
+            display: none;
+        }
+
+        .photo-box .upload-hint {
+            text-align: center;
+            font-size: 0.9em;
+        }
+
+        .photo-box .delete-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: none;
+            font-size: 1.2em;
+            z-index: 10;
+        }
+
+        .photo-box:hover .delete-btn {
+            display: block;
+        }
+
+        .photo-box .delete-btn:hover {
+            background: rgba(232, 93, 117, 0.9);
+        }
+
+        /* 文字内容 */
+        .text-content {
+            line-height: 1.8;
+            font-size: 1.05em;
+        }
+
+        .text-content p {
+            margin: 15px 0;
+        }
+
+        /* 链接 */
+        .links {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .link-item {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            text-decoration: none;
+            color: #333;
+            transition: all 0.2s;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .link-item:hover {
+            background: #e85d75;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .link-item .emoji {
+            font-size: 2em;
+            margin-bottom: 8px;
+        }
+
+        .link-item.editable {
+            border: 2px dashed #ddd;
+        }
+
+        .link-item .edit-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            border: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 0.9em;
+            display: none;
+        }
+
+        .link-item:hover .edit-btn {
+            display: block;
+        }
+
+        .edit-btn:hover {
+            background: rgba(232, 93, 117, 0.9);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .modal-content h3 {
+            margin-bottom: 20px;
+            color: #e85d75;
+        }
+
+        .modal-content input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1em;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .modal-buttons button {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+
+        .btn-save {
+            background: #e85d75;
+            color: white;
+        }
+
+        .btn-cancel {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>生日快乐 🎂</h1>
+        <p>给李静文</p>
+    </div>
+
+    <div class="container">
+        <!-- 音乐 -->
+        <div class="music-box">
+            <button onclick="toggleMusic()" id="musicBtn">点我放歌</button>
+            <span id="status" style="margin-left: 15px; color: #666;"></span>
+            <audio id="bgm" loop>
+                <source src="music.mp3" type="audio/mpeg">
+            </audio>
+            <p style="margin-top: 10px; font-size: 0.9em; color: #999;">把音乐文件命名成music.mp3上传就行</p>
+        </div>
+
+        <!-- 想说的话 -->
+        <div class="content-section">
+            <h2>想跟你说</h2>
+            <div class="text-content">
+                <p>今天是文文生日，特地给你弄了这个</p>
+                <p>认识你到现在，真的很开心</p>
+                <p>希望以后每年你生日我都能陪着你</p>
+                <p>生日快乐，爱你</p>
+            </div>
+        </div>
+
+        <!-- 照片 -->
+        <div class="content-section">
+            <h2>放点照片</h2>
+            <div class="photos">
+                <div class="photo-box" onclick="document.getElementById('file1').click()">
+                    <input type="file" id="file1" accept="image/*" onchange="loadPhoto(this, 'img1')">
+                    <img id="img1" style="display: none;">
+                    <span class="upload-hint">点击上传<br>照片1</span>
+                    <button class="delete-btn" onclick="deletePhoto(event, 1)">×</button>
+                </div>
+                <div class="photo-box" onclick="document.getElementById('file2').click()">
+                    <input type="file" id="file2" accept="image/*" onchange="loadPhoto(this, 'img2')">
+                    <img id="img2" style="display: none;">
+                    <span class="upload-hint">点击上传<br>照片2</span>
+                    <button class="delete-btn" onclick="deletePhoto(event, 2)">×</button>
+                </div>
+                <div class="photo-box" onclick="document.getElementById('file3').click()">
+                    <input type="file" id="file3" accept="image/*" onchange="loadPhoto(this, 'img3')">
+                    <img id="img3" style="display: none;">
+                    <span class="upload-hint">点击上传<br>照片3</span>
+                    <button class="delete-btn" onclick="deletePhoto(event, 3)">×</button>
+                </div>
+                <div class="photo-box" onclick="document.getElementById('file4').click()">
+                    <input type="file" id="file4" accept="image/*" onchange="loadPhoto(this, 'img4')">
+                    <img id="img4" style="display: none;">
+                    <span class="upload-hint">点击上传<br>照片4</span>
+                    <button class="delete-btn" onclick="deletePhoto(event, 4)">×</button>
+                </div>
+            </div>
+            <p style="color: #999; font-size: 0.9em;">点击方框上传照片，鼠标悬停在照片上可以看到删除按钮</p>
+        </div>
+
+        <!-- 生日愿望 -->
+        <div class="content-section">
+            <h2>生日愿望</h2>
+            <div class="text-content">
+                <p>希望你每天都开开心心的</p>
+                <p>想做什么就去做，想吃什么就去吃</p>
+                <p>我们能一直一直在一起</p>
+                <p>你想要的都能得到</p>
+                <p>反正就是希望你好好的</p>
+            </div>
+        </div>
+
+        <!-- 常用链接 -->
+        <div class="content-section">
+            <h2>给你放的链接</h2>
+            <div class="links" id="linksContainer">
+                <!-- 链接会自动加载 -->
+            </div>
+        </div>
+
+        <!-- 编辑链接弹窗 -->
+        <div class="modal" id="editModal">
+            <div class="modal-content">
+                <h3>编辑链接</h3>
+                <input type="text" id="linkEmoji" placeholder="输入图标(如: 📺)">
+                <input type="text" id="linkName" placeholder="输入名称(如: 爱奇艺)">
+                <input type="text" id="linkUrl" placeholder="输入网址(如: https://www.iqiyi.com)">
+                <div class="modal-buttons">
+                    <button class="btn-save" onclick="saveLink()">保存</button>
+                    <button class="btn-cancel" onclick="closeModal()">取消</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>2025.9.26</p>
+        </div>
+    </div>
+
+    <script>
+        let playing = false;
+        const music = document.getElementById('bgm');
+        const btn = document.getElementById('musicBtn');
+        const status = document.getElementById('status');
+        let currentEditIndex = -1;
+
+        // 默认链接（已清理空格，蔡徐坤链接更新）
+        const defaultLinks = [
+            {emoji: '📺', name: '爱奇艺', url: 'https://www.iqiyi.com'},
+            {emoji: '🎬', name: '腾讯视频', url: 'https://v.qq.com'},
+            {emoji: '🎵', name: '网易云', url: 'https://music.163.com'},
+            {emoji: '🎶', name: 'QQ音乐', url: 'https://y.qq.com'},
+            {emoji: '⭐', name: '蔡徐坤', url: 'https://kunofficial.com.cn/'},
+            {emoji: '🔗', name: '自定义', url: 'https://www.baidu.com'}
+        ];
+
+        function toggleMusic() {
+            if (playing) {
+                music.pause();
+                btn.textContent = '点我放歌';
+                status.textContent = '';
+            } else {
+                music.play();
+                btn.textContent = '暂停';
+                status.textContent = '正在播放...';
+            }
+            playing = !playing;
+        }
+
+        // 自动播放
+        window.onload = function() {
+            music.play().then(() => {
+                playing = true;
+                btn.textContent = '暂停';
+                status.textContent = '正在播放...';
+            }).catch(() => {
+                status.textContent = '请点击“点我放歌”手动播放';
+            });
+
+            // 加载保存的照片
+            for (let i = 1; i <= 4; i++) {
+                const savedImg = localStorage.getItem('photo' + i);
+                if (savedImg) {
+                    const img = document.getElementById('img' + i);
+                    img.src = savedImg;
+                    img.style.display = 'block';
+                    img.parentElement.querySelector('.upload-hint').style.display = 'none';
+                }
+            }
+
+            // 加载链接
+            loadLinks();
+        }
+
+        // 上传照片
+        function loadPhoto(input, imgId) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.getElementById(imgId);
+                    img.src = e.target.result;
+                    img.style.display = 'block';
+                    img.parentElement.querySelector('.upload-hint').style.display = 'none';
+                    
+                    // 保存到浏览器
+                    const photoNum = imgId.replace('img', '');
+                    localStorage.setItem('photo' + photoNum, e.target.result);
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        // 删除照片
+        function deletePhoto(event, num) {
+            event.stopPropagation();
+            if (confirm('确定要删除这张照片吗？')) {
+                const img = document.getElementById('img' + num);
+                const hint = img.parentElement.querySelector('.upload-hint');
+                
+                img.style.display = 'none';
+                img.src = '';
+                hint.style.display = 'block';
+                
+                localStorage.removeItem('photo' + num);
+                document.getElementById('file' + num).value = '';
+            }
+        }
+
+        // 加载链接
+        function loadLinks() {
+            let links = JSON.parse(localStorage.getItem('customLinks'));
+            if (!links) {
+                links = defaultLinks;
+                localStorage.setItem('customLinks', JSON.stringify(links));
+            }
+            
+            const container = document.getElementById('linksContainer');
+            container.innerHTML = '';
+            
+            links.forEach((link, index) => {
+                const linkDiv = document.createElement('div');
+                linkDiv.className = 'link-item';
+                linkDiv.innerHTML = `
+                    <div class="emoji">${link.emoji}</div>
+                    <div>${link.name}</div>
+                    <button class="edit-btn" onclick="editLink(event, ${index})">✏️</button>
+                `;
+                linkDiv.onclick = function(e) {
+                    if (!e.target.classList.contains('edit-btn')) {
+                        window.open(link.url, '_blank');
+                    }
+                };
+                container.appendChild(linkDiv);
+            });
+        }
+
+        // 编辑链接
+        function editLink(event, index) {
+            event.stopPropagation();
+            currentEditIndex = index;
+            
+            const links = JSON.parse(localStorage.getItem('customLinks'));
+            const link = links[index];
+            
+            document.getElementById('linkEmoji').value = link.emoji;
+            document.getElementById('linkName').value = link.name;
+            document.getElementById('linkUrl').value = link.url;
+            
+            document.getElementById('editModal').style.display = 'flex';
+        }
+
+        // 保存链接（增强 URL 处理）
+        function saveLink() {
+            const emoji = document.getElementById('linkEmoji').value.trim();
+            const name = document.getElementById('linkName').value.trim();
+            let url = document.getElementById('linkUrl').value.trim();
+            
+            if (!name || !url) {
+                alert('请填写名称和网址');
+                return;
+            }
+
+            // 自动补全协议
+            if (!/^https?:\/\//i.test(url)) {
+                url = 'https://' + url;
+            }
+
+            const links = JSON.parse(localStorage.getItem('customLinks'));
+            links[currentEditIndex] = {
+                emoji: emoji || '🔗',
+                name: name,
+                url: url
+            };
+            
+            localStorage.setItem('customLinks', JSON.stringify(links));
+            loadLinks();
+            closeModal();
+        }
+
+        // 关闭弹窗
+        function closeModal() {
+            document.getElementById('editModal').style.display = 'none';
+            document.getElementById('linkEmoji').value = '';
+            document.getElementById('linkName').value = '';
+            document.getElementById('linkUrl').value = '';
+        }
+    </script>
+</body>
+</html>
